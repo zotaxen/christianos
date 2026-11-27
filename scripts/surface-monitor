@@ -1,0 +1,100 @@
+#!/bin/bash
+# surface-monitor – Surface (oder anderes Tablet) als zweiten Bildschirm nutzen
+#
+# Aufruf:
+#   surface-monitor          Menü (rofi) mit Ein/Aus/Adresse
+#   surface-monitor --toggle Ein- bzw. Ausschalten ohne Menü (für Tastenkürzel)
+#
+# Benötigt: wayvnc, rofi, libnotify (notify-send), wl-clipboard (optional, zum Kopieren)
+
+PORT=5900
+STATUS_DATEI="${XDG_RUNTIME_DIR:-/tmp}/surface-monitor.name"
+
+# Aktuelle IP im Netz herausfinden (egal ob WLAN oder LAN)
+ip_adresse() {
+    ip -4 route get 1.1.1.1 2>/dev/null | grep -oP 'src \K[\d.]+'
+}
+
+laeuft() {
+    pgrep -x wayvnc > /dev/null
+}
+
+# Alle Monitornamen, die Hyprland gerade kennt
+monitore() {
+    hyprctl monitors all | awk '/^Monitor/ {print $2}'
+}
+
+einschalten() {
+    if laeuft; then
+        notify-send "Surface-Monitor" "Läuft bereits: $(ip_adresse):$PORT"
+        return
+    fi
+
+    # Neuen virtuellen Monitor anlegen und seinen Namen herausfinden
+    vorher=$(monitore)
+    hyprctl output create headless > /dev/null
+    sleep 0.5
+    name=$(comm -13 <(echo "$vorher" | sort) <(monitore | sort) | head -n1)
+
+    if [ -z "$name" ]; then
+        notify-send -u critical "Surface-Monitor" "Virtueller Monitor konnte nicht angelegt werden."
+        return 1
+    fi
+    echo "$name" > "$STATUS_DATEI"
+
+    # Bildschirm im Netz freigeben
+    wayvnc --disable-input -o "$name" 0.0.0.0 "$PORT" > /dev/null 2>&1 &
+    sleep 0.5
+
+    if ! laeuft; then
+        hyprctl output remove "$name" > /dev/null
+        rm -f "$STATUS_DATEI"
+        notify-send -u critical "Surface-Monitor" "wayvnc ist nicht gestartet. Ist es installiert?"
+        return 1
+    fi
+
+    notify-send "Surface-Monitor an" "In Remmina (VNC) verbinden mit:\n$(ip_adresse):$PORT\n\nOhne Passwort – nur im eigenen Netz nutzen!"
+}
+
+ausschalten() {
+    pkill -x wayvnc
+    if [ -f "$STATUS_DATEI" ]; then
+        hyprctl output remove "$(cat "$STATUS_DATEI")" > /dev/null
+        rm -f "$STATUS_DATEI"
+    fi
+    notify-send "Surface-Monitor" "ausgeschaltet"
+}
+
+adresse_kopieren() {
+    adresse="$(ip_adresse):$PORT"
+    if command -v wl-copy > /dev/null; then
+        echo -n "$adresse" | wl-copy
+        notify-send "Surface-Monitor" "$adresse in die Zwischenablage kopiert"
+    else
+        notify-send "Surface-Monitor" "$adresse"
+    fi
+}
+
+menue() {
+    if laeuft; then
+        zustand="Status: AN  ·  $(ip_adresse):$PORT"
+        auswahl=$(printf '%s\n' "Ausschalten" "Adresse kopieren" \
+            | rofi -dmenu -i -p "Surface-Monitor" -mesg "$zustand")
+    else
+        zustand="Status: AUS  ·  Netz: $(ip_adresse)"
+        auswahl=$(printf '%s\n' "Einschalten" \
+            | rofi -dmenu -i -p "Surface-Monitor" -mesg "$zustand")
+    fi
+
+    case "$auswahl" in
+        "Einschalten")      einschalten ;;
+        "Ausschalten")      ausschalten ;;
+        "Adresse kopieren") adresse_kopieren ;;
+        *)                  exit 0 ;;   # Esc
+    esac
+}
+
+case "$1" in
+    --toggle) if laeuft; then ausschalten; else einschalten; fi ;;
+    *)        menue ;;
+esac

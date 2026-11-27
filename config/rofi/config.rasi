@@ -1,0 +1,15 @@
+/* ~/.config/rofi/config.rasi – Grundeinstellungen für rofi */
+
+configuration {
+    modi:                "drun";
+    show-icons:          true;
+    icon-theme:          "candy-icons";
+    drun-display-format: "{name}";
+    display-drun:        "Apps";
+    font:                "JetBrainsMono Nerd Font 12";
+    hover-select:        true;
+    me-select-entry:     "";
+    me-accept-entry:     "MousePrimary";
+}
+
+@theme "christianos"

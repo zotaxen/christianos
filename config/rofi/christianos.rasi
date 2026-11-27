@@ -1,0 +1,110 @@
+/* =====================================================================
+   ~/.config/rofi/christianos.rasi – App-Menü im ChristianOS-Design
+   Vollbild mit Hintergrundbild, großes Icon-Raster, Lila/Pink
+   ===================================================================== */
+
+* {
+    /* Farben – hier kannst du alles anpassen (#RRGGBBAA) */
+    hintergrund:      #1e1e2ee6;
+    hintergrund-hell: #2a2a40cc;
+    abdunklung:       #14141e99;   /* dunkler Schleier über dem Bild */
+    schrift:          #e0def4;
+    schrift-gedimmt:  #908caa;
+    lila:             #9b59b6;
+    pink:             #ff79c6;
+
+    background-color: transparent;
+    text-color:       @schrift;
+}
+
+/* ---------------------------------------------------------------------
+   Das ganze Fenster: Vollbild mit Hintergrundbild
+   VARIANTE A (aktiv): eigenes Bild
+   VARIANTE B: kein Bild, nur durchsichtig -> dein animiertes
+               Desktop-GIF scheint durch. Dafür die Zeile mit
+               background-image löschen oder mit // davor deaktivieren.
+   --------------------------------------------------------------------- */
+window {
+    fullscreen:       true;
+    padding:          0;
+    border:           0;
+    background-color: @abdunklung;
+    background-image: url("~/Pictures/wallpaper/menue.png", height);
+}
+
+/* Inhalt mit dunklem Schleier, damit Icons und Text gut lesbar sind */
+mainbox {
+    children:         [ inputbar, listview ];
+    spacing:          40px;
+    padding:          80px 220px;
+    background-color: @abdunklung;
+}
+
+/* Suchleiste oben */
+inputbar {
+    children:         [ prompt, entry ];
+    spacing:          12px;
+    padding:          14px 22px;
+    margin:           0 300px;
+    border:           2px;
+    border-color:     #9b59b680;
+    border-radius:    16px;
+    background-color: @hintergrund-hell;
+}
+
+prompt {
+    text-color: @pink;
+}
+
+entry {
+    placeholder:       "Suchen …";
+    placeholder-color: @schrift-gedimmt;
+    cursor:            text;
+}
+
+/* Das Raster mit den Apps */
+listview {
+    columns:       7;
+    lines:         4;
+    spacing:       24px;
+    fixed-height:  true;
+    fixed-columns: true;
+    scrollbar:     false;
+    cycle:         true;
+}
+
+/* Eine einzelne App-Kachel */
+element {
+    orientation:   vertical;
+    padding:       20px 8px;
+    spacing:       12px;
+    border-radius: 20px;
+    cursor:        pointer;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+}
+
+/* Ausgewählte Kachel (Maus drüber oder Pfeiltasten) */
+/* Hinweis: Im Farbverlauf keine @Variablen benutzen, nur Farbcodes! */
+element selected.normal {
+    background-image: linear-gradient(to right, #9b59b6cc, #ff79c6cc);
+    text-color:       #ffffff;
+}
+
+element-icon {
+    size:             80px;
+    horizontal-align: 0.5;
+    background-color: transparent;
+    cursor:           inherit;
+}
+
+element-text {
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+    background-color: transparent;
+    text-color:       inherit;
+    cursor:           inherit;
+}

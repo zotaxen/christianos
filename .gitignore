@@ -1,0 +1,28 @@
+# Sicherheitsnetz: Diese Dateien dürfen nie ins Repository
+
+# Schlüssel und Zertifikate
+*.key
+*.pem
+*.p12
+*.cer
+.ssh/
+.gnupg/
+
+# Zugangsdaten
+rclone.conf
+.git-credentials
+*credentials*
+*secret*
+*.env
+
+# Verläufe
+*history*
+
+# Persönliche Einstellungen von ChristianOS (werden beim Start selbst angelegt)
+christianos/ordner
+christianos/wallpaper
+
+# Sicherungskopien und Editor-Reste
+*.bak
+*~
+*.swp
