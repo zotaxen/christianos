@@ -48,7 +48,7 @@ Optional:
 > und kitty. `install.sh` legt vorher automatisch eine Sicherung an.
 
 ```bash
-git clone <URL-dieses-Repositorys> ~/christianos
+git clone https://github.com/zotaxen/christianos.git ~/christianos
 cd ~/christianos
 ./install.sh
 ```
